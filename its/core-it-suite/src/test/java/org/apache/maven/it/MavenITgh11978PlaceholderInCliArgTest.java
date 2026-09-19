@@ -37,11 +37,9 @@ class MavenITgh11978PlaceholderInCliArgTest extends AbstractMavenIntegrationTest
 
     @Test
     void testIt() throws Exception {
-        Path basedir = extractResources("/gh-11978-placeholder-in-cli-arg")
-                .getAbsoluteFile()
-                .toPath();
+        Path basedir = extractResources("/gh-11978-placeholder-in-cli-arg");
 
-        Verifier verifier = newVerifier(basedir.toString());
+        Verifier verifier = newVerifier(basedir);
         verifier.setForkJvm(true); // NOTE: We want to go through the launcher script
         // The placeholder name contains dots, which is invalid as a shell variable name.
         // Without the fix, the shell's `eval exec` aborts with "bad substitution".
@@ -52,8 +50,10 @@ class MavenITgh11978PlaceholderInCliArgTest extends AbstractMavenIntegrationTest
         verifier.verifyErrorFreeLog(); // primary check: shell crash produces non-zero exit
 
         // Secondary: verify the literal placeholder flowed through Maven.
-        // Maven resolves the unknown ${some.maven.placeholder} to empty.
+        // Unknown ${...} expressions are preserved as literals (Maven 3 semantics, see gh-12507);
+        // they are not replaced with empty strings at CLI parse time.
         Properties props = verifier.loadProperties("target/pom.properties");
-        assertEquals("-value__end-", props.getProperty("project.properties.pom.placeholder"));
+        assertEquals(
+                "-value_${some.maven.placeholder}_end-", props.getProperty("project.properties.pom.placeholder"));
     }
 }

@@ -18,7 +18,6 @@
  */
 package org.apache.maven.it;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -35,12 +34,11 @@ class MavenITgh11140RepoInterpolationTest extends AbstractMavenIntegrationTestCa
 
     @Test
     void testInterpolationFromEnvAndProps() throws Exception {
-        File testDir = extractResources("/gh-11140-repo-interpolation");
-        Verifier verifier = newVerifier(testDir.getAbsolutePath());
+        Path testDir = extractResources("gh-11140-repo-interpolation");
+        Verifier verifier = newVerifier(testDir);
 
         // Provide env vars consumed by POM via ${env.*}
-        Path base = testDir.toPath().toAbsolutePath();
-        String baseUri = getBaseUri(base);
+        String baseUri = getBaseUri(testDir);
         verifier.setEnvironmentVariable("IT_REPO_BASE", baseUri);
         verifier.setEnvironmentVariable("IT_DM_BASE", baseUri);
 
@@ -72,8 +70,8 @@ class MavenITgh11140RepoInterpolationTest extends AbstractMavenIntegrationTestCa
 
     @Test
     void testUnresolvedPlaceholderWarnsAndSkipsRepository() throws Exception {
-        File testDir = extractResources("/gh-11140-repo-interpolation");
-        Verifier verifier = newVerifier(testDir.getAbsolutePath());
+        Path testDir = extractResources("gh-11140-repo-interpolation");
+        Verifier verifier = newVerifier(testDir);
 
         // Do NOT set env vars, so placeholders stay
         verifier.addCliArgument("validate");

@@ -18,7 +18,6 @@
  */
 package org.apache.maven.it;
 
-import java.io.File;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,24 +46,22 @@ class MavenITgh11772ConsumerPom410Test extends AbstractMavenIntegrationTestCase 
 
     @Test
     void testConsumerPomsAre400BuildPomsAre410() throws Exception {
-        File basedir = extractResources("/gh-11772-consumer-pom-410");
+        Path basedir = extractResources("/gh-11772-consumer-pom-410");
 
-        Verifier verifier = newVerifier(basedir.getAbsolutePath());
+        Verifier verifier = newVerifier(basedir);
         verifier.deleteArtifacts(GROUP_ID);
         verifier.addCliArguments("install");
         verifier.execute();
         verifier.verifyErrorFreeLog();
 
         // Verify parent consumer POM (main artifact) is 4.0.0
-        Path parentConsumerPom =
-                Path.of(verifier.getArtifactPath(GROUP_ID, "parent", "1.0.0-SNAPSHOT", "pom"));
+        Path parentConsumerPom = verifier.getArtifactPath(GROUP_ID, "parent", "1.0.0-SNAPSHOT", "pom");
         assertTrue(Files.exists(parentConsumerPom), "Parent consumer POM should exist");
         Model parentConsumer = readModel(parentConsumerPom);
         assertEquals("4.0.0", parentConsumer.getModelVersion(), "Parent consumer POM should be 4.0.0");
 
         // Verify parent build POM retains 4.1.0 features
-        Path parentBuildPom =
-                Path.of(verifier.getArtifactPath(GROUP_ID, "parent", "1.0.0-SNAPSHOT", "pom", "build"));
+        Path parentBuildPom = verifier.getArtifactPath(GROUP_ID, "parent", "1.0.0-SNAPSHOT", "pom", "build");
         assertTrue(Files.exists(parentBuildPom), "Parent build POM should exist");
         Model parentBuild = readModel(parentBuildPom);
         // Build POM should retain subprojects (4.1.0 feature)
@@ -72,8 +69,7 @@ class MavenITgh11772ConsumerPom410Test extends AbstractMavenIntegrationTestCase 
         assertTrue(!parentBuild.getSubprojects().isEmpty(), "Build POM should retain subprojects");
 
         // Verify child consumer POM is 4.0.0
-        Path childConsumerPom =
-                Path.of(verifier.getArtifactPath(GROUP_ID, "child", "1.0.0-SNAPSHOT", "pom"));
+        Path childConsumerPom = verifier.getArtifactPath(GROUP_ID, "child", "1.0.0-SNAPSHOT", "pom");
         assertTrue(Files.exists(childConsumerPom), "Child consumer POM should exist");
         Model childConsumer = readModel(childConsumerPom);
         assertEquals("4.0.0", childConsumer.getModelVersion(), "Child consumer POM should be 4.0.0");
@@ -84,8 +80,7 @@ class MavenITgh11772ConsumerPom410Test extends AbstractMavenIntegrationTestCase 
         assertEquals("parent", childConsumer.getParent().getArtifactId());
 
         // Verify child build POM exists
-        Path childBuildPom =
-                Path.of(verifier.getArtifactPath(GROUP_ID, "child", "1.0.0-SNAPSHOT", "pom", "build"));
+        Path childBuildPom = verifier.getArtifactPath(GROUP_ID, "child", "1.0.0-SNAPSHOT", "pom", "build");
         assertTrue(Files.exists(childBuildPom), "Child build POM should exist");
     }
 

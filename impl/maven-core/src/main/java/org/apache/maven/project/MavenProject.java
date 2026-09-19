@@ -632,7 +632,6 @@ public class MavenProject implements Cloneable {
     }
 
     public String getName() {
-        // TODO this should not be allowed to be null.
         if (getModel().getName() != null) {
             return getModel().getName();
         } else {
@@ -882,7 +881,6 @@ public class MavenProject implements Cloneable {
 
     public void setArtifacts(Set<Artifact> artifacts) {
         this.artifacts = artifacts;
-
         // flush the calculated artifactMap
         artifactMap = null;
     }
@@ -900,12 +898,13 @@ public class MavenProject implements Cloneable {
             if (artifactFilter == null || resolvedArtifacts == null) {
                 artifacts = new LinkedHashSet<>();
             } else {
-                artifacts = new LinkedHashSet<>(resolvedArtifacts.size() * 2);
+                Set<Artifact> result = new LinkedHashSet<>(resolvedArtifacts.size() * 2);
                 for (Artifact artifact : resolvedArtifacts) {
                     if (artifactFilter.include(artifact)) {
-                        artifacts.add(artifact);
+                        result.add(artifact);
                     }
                 }
+                artifacts = result;
             }
         }
         return artifacts;
@@ -1218,7 +1217,11 @@ public class MavenProject implements Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getGroupId(), getArtifactId(), getVersion());
+        // Inlined hash avoids Object[] varargs allocation from Objects.hash()
+        int result = 31 + Objects.hashCode(getGroupId());
+        result = 31 * result + Objects.hashCode(getArtifactId());
+        result = 31 * result + Objects.hashCode(getVersion());
+        return result;
     }
 
     public List<Extension> getBuildExtensions() {
