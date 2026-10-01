@@ -25,7 +25,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.maven.api.xml.XmlNode;
@@ -171,7 +173,11 @@ public class DefaultBeanConfigurator implements BeanConfigurator {
             }
             String name = config.getName();
             Object value = evaluator.evaluate(config.getValue());
-            return XmlNode.newInstance(name, value != null ? value.toString() : null, null, children, null);
+            Map<String, String> attributes = new LinkedHashMap<>();
+            for (String attributeName : config.getAttributeNames()) {
+                attributes.put(attributeName, config.getAttribute(attributeName));
+            }
+            return XmlNode.newInstance(name, value != null ? value.toString() : null, attributes, children, null);
         }
     }
 

@@ -23,6 +23,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.StringReader;
 
+import org.apache.maven.api.xml.XmlNode;
 import org.apache.maven.api.xml.XmlService;
 import org.apache.maven.configuration.internal.DefaultBeanConfigurator;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
@@ -112,6 +113,18 @@ class DefaultBeanConfiguratorTest {
     }
 
     @Test
+    void testXmlNodeAttributes() throws BeanConfigurationException {
+        SomeBean bean = new SomeBean();
+        Xpp3Dom config = toConfig("<node><echo message=\"hello\"/></node>");
+        DefaultBeanConfigurationRequest request = new DefaultBeanConfigurationRequest();
+        request.setBean(bean).setConfiguration(config);
+
+        configurator.configureBean(request);
+
+        assertEquals("hello", bean.node.child("echo").attribute("message"));
+    }
+
+    @Test
     void testSealedTypeImplementationHintCanUseSimpleName() throws BeanConfigurationException {
         SealedBean bean = new SealedBean();
 
@@ -175,6 +188,8 @@ class DefaultBeanConfiguratorTest {
     static class SomeBean {
 
         File file;
+
+        XmlNode node;
     }
 
     static class SealedBean {
